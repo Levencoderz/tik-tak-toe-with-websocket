@@ -32,55 +32,71 @@ class Server:
         matrix = [[-1 for j in range(3)] for i in range(3)]
         username = player
 
-
         for step in steps:
             splitted = map(int, step['coordinate'].split(','))
-            coordinate1 = splitted[0].strip()
-            coordinate2 = splitted[1].strip()
-            matrix[coordinate1][coordinate2] = step['username']
+            coord1 = splitted[0].strip()
+            coord2 = splitted[1].strip()
+            matrix[coord1][coord2] = step['username']
 
-        for index5 in range(3):
-            found = False
-            for index6 in range(3):
-                if matrix[index5][index6] == username:
-                    found = True
-                else:
-                    found = False
-                    break
-            if found:
-                return True
-        for index7 in range(3):
-            found = False
-            for index8 in range(3):
-                if matrix[index8][index7] == username:
-                    found = True
-                else:
-                    found = False
-                    break
-            if found:
-                return True
+            def get_left_digonal(matrix):
+                found = False
+                for index9 in range(3):
+                    index10 = index9
+                    if matrix[index9][index10] == username:
+                        found = True
+                    else:
+                        found = False
+                        break
+                if found:
+                    return True
 
-        found = False
-        for index9 in range(3):
-            index10 = index9
-            if matrix[index9][index10] == username:
-                found = True
-            else:
+            def get_right_digonal(matrix):
                 found = False
-                break
-        if found:
-            return True
-        found = False
-        for index9 in range(3):
-            index10 = 3 - index9
-            if matrix[index9][index10] == username:
-                found = True
-            else:
-                found = False
-                break
-        if found:
-            return True
-        return found
+                for index9 in range(3):
+                    index10 = 3 - index9
+                    if matrix[index9][index10] == username:
+                        found = True
+                    else:
+                        found = False
+                        break
+                if found:
+                    return True
+                return found
+
+            def get_horizontal(matrix):
+                for index5 in range(3):
+                    found = False
+                    for index6 in range(3):
+                        if matrix[index5][index6] == username:
+                            found = True
+                        else:
+                            found = False
+                            break
+                    if found:
+                        return True
+
+            def get_vertical(matrix):
+                for index7 in range(3):
+                    found = False
+                    for index8 in range(3):
+                        if matrix[index8][index7] == username:
+                            found = True
+                        else:
+                            found = False
+                            break
+                    if found:
+                        return True
+
+            won = False
+            if self.get_horizontal(matrix):
+                won = True
+            elif self.get_vertical(matrix):
+                won = True
+            elif self.get_left_digonal(matrix):
+                won = True
+            elif self.get_right_digonal(matrix):
+                won = True
+            return won
 
     async def handler(self, websocket, path):
         if 'login' in path:
@@ -117,6 +133,7 @@ class Server:
 
         elif 'get-feed' in path:
             async for message in websocket:
+                message = json.loads(message)
                 account, status = self.get_account(message['token'])
                 if status == True:
                     feed = [i for i in self.feed()]
@@ -130,6 +147,7 @@ class Server:
 
         elif 'create-game' in path:
             async for message in websocket:
+                message = json.loads(message)
                 account, status = self.get_account(message['token'])
                 import uuid
                 if status:
@@ -156,9 +174,9 @@ class Server:
                     for index1, value1 in enumerate(self.feed):
                         if value1['id'] == game:
                             if value1['player_one'] == account['username']:
-                                await websocket.send({'status': False, 'message': 'You are already in a match'})
+                                await websocket.send(json.dumps({'status': False, 'message': 'You are already in a match'}))
                             elif value1['player_two'] == account['username']:
-                                await websocket.send({'status': False, 'message': 'You are the host.'})
+                                await websocket.send(json.dumps({'status': False, 'message': 'You are the host.'}))
                             else:
                                 self.feed[index1] = dict(
                                     id=value1['id'],
@@ -168,12 +186,13 @@ class Server:
                                     winner=str(),
                                     connection=[]
                                 )
-                                await websocket.send({'status': False, 'message': 'Game joined'})
+                                await websocket.send(json.dumps({'status': False, 'message': 'Game joined'}))
                 else:
-                    await websocket.send({'status': False, 'message': 'Unauthorized.'})
+                    await websocket.send(json.dumps({'status': False, 'message': 'Unauthorized.'}))
 
         elif 'join-game' in path:
             async for message in websocket:
+                message = json.loads(message)
                 account, status = self.get_account(message['token'])
 
                 if status
@@ -205,6 +224,7 @@ class Server:
 
         elif 'game-step' in path:
             async for message in websocket:
+                message = json.loads(message)
                 account, status = self.get_account(message['token'])
 
                 if status:
