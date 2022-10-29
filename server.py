@@ -32,10 +32,12 @@ class Server:
         matrix = [[-1 for j in range(3)] for i in range(3)]
         username = player
 
+
         for step in steps:
-            coordinate1 = step['coordinate']
-            coordinate2 = step['coordinate']
-            matrix[coordinate1][coordinate2] = username
+            splitted = map(int, step['coordinate'].split(','))
+            coordinate1 = splitted[0].strip()
+            coordinate2 = splitted[1].strip()
+            matrix[coordinate1][coordinate2] = step['username']
 
         for index5 in range(3):
             found = False
