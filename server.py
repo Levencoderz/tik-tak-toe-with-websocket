@@ -251,7 +251,7 @@ class Server:
                     value4['step'].append(
                         {
                             'username': account['username'], 
-                            'coorinate': step
+                            'coordinate': step
                         }
                     )
                     game = dict(
