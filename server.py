@@ -63,18 +63,6 @@ class Server:
                     return True
                 return found
 
-            def get_horizontal(matrix):
-                for index5 in range(3):
-                    found = False
-                    for index6 in range(3):
-                        if matrix[index5][index6] == username:
-                            found = True
-                        else:
-                            found = False
-                            break
-                    if found:
-                        return True
-
             def get_vertical(matrix):
                 for index7 in range(3):
                     found = False
@@ -87,14 +75,25 @@ class Server:
                     if found:
                         return True
 
+            def get_horizontal(matrix):
+                for index5 in range(3):
+                    found = False
+                    for index6 in range(3):
+                        if matrix[index5][index6] == username:
+                            found = True
+                        else:
+                            found = False
+                            break
+                    if found:
+                        return True
             won = False
-            if self.get_horizontal(matrix):
+            if get_horizontal(matrix):
                 won = True
-            elif self.get_vertical(matrix):
+            elif get_vertical(matrix):
                 won = True
-            elif self.get_left_digonal(matrix):
+            elif get_left_digonal(matrix):
                 won = True
-            elif self.get_right_digonal(matrix):
+            elif get_right_digonal(matrix):
                 won = True
             return won
 
