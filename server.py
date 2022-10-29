@@ -223,11 +223,11 @@ class Server:
                         if status is 'MATCH_OVER':
                             await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'DRAW', 'game': game_stat})) for i in game_sockets])
                         elif status is 'WON':
-                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'WON', 'game': game_stat}))])
+                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'WON', 'game': game_stat})) for i in game_sockets])
                         elif status is 'STEPPED':
-                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'STEPPED','game': game_stat}))])
+                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'STEPPED','game': game_stat})) for i in game_sockets])
                         elif status is 'WAIT':
-                            await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'Waiting for next player', 'game': game_stat}))])
+                            await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'Waiting for next player', 'game': game_stat})) for i in game_sockets])
                     else:
                         await websocket.send({'status': False, 'message': 'Game not found'})
                 else:
