@@ -218,15 +218,16 @@ class Server:
 
                         coordinate = message['data']['coordinate']
                         game_stat, status = self.game_status(account, game_instance, coordinate)
+                        game_sockets = [i['socket'] for i in value2['connection']]
 
                         if status is 'MATCH_OVER':
-                            await websocket.send(json.dumps({'status': False, 'message': 'DRAW', 'game': game_stat}))
+                            await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'DRAW', 'game': game_stat})) for i in game_sockets])
                         elif status is 'WON':
-                            await websocket.send(json.dumps({'status': True, 'message': 'WON', 'game': game_stat}))
+                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'WON', 'game': game_stat}))])
                         elif status is 'STEPPED':
-                            await websocket.send(json.dumps({'status': True, 'message': 'STEPPED','game': game_stat}))
+                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'STEPPED','game': game_stat}))])
                         elif status is 'WAIT':
-                            await websocket.send(json.dumps({'status': False, 'message': 'Waiting for next player', 'game': game_stat}))
+                            await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'Waiting for next player', 'game': game_stat}))])
                     else:
                         await websocket.send({'status': False, 'message': 'Game not found'})
                 else:
