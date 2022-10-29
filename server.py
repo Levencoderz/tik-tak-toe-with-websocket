@@ -28,6 +28,58 @@ class Server:
             account, status = CLAIM, True
         return dict(), False
 
+    def won(self, steps, player):
+        matrix = [[-1 for j in range(3)] for i in range(3)]
+        username = player
+
+        for step in steps:
+            coordinate1 = step['coordinate']
+            coordinate2 = step['coordinate']
+            matrix[coordinate1][coordinate2] = username
+
+        for index5 in range(3):
+            found = False
+            for index6 in range(3):
+                if matrix[index5][index6] == username:
+                    found = True
+                else:
+                    found = False
+                    break
+            if found:
+                return True
+        for index7 in range(3):
+            found = False
+            for index8 in range(3):
+                if matrix[index8][index7] == username:
+                    found = True
+                else:
+                    found = False
+                    break
+            if found:
+                return True
+
+        found = False
+        for index9 in range(3):
+            index10 = index9
+            if matrix[index9][index10] == username:
+                found = True
+            else:
+                found = False
+                break
+        if found:
+            return True
+        found = False
+        for index9 in range(3):
+            index10 = 3 - index9
+            if matrix[index9][index10] == username:
+                found = True
+            else:
+                found = False
+                break
+        if found:
+            return True
+        return found
+
     async def handler(self, websocket, path):
         if 'login' in path:
             async for message in websocket:
@@ -237,55 +289,6 @@ class Server:
                         return value4['steps'], 'WON'
                     else:
                         return value4['steps'], 'STEPPED' 
-
-    def won(self, steps, account):
-        matrix = [[-1 for j in range(3)] for i in range(3)]
-        username = account['username']
-
-        for step in steps:
-            username =  account['username']
-            cordinate = step['coordinate']
-            matrix[cordinate[0]][coordinate[1]] = username
-
-        for index5 in range(3):
-            found = False
-            for index6 in range(3):
-                if matrix[index5][index6] == username:
-                    found = True
-                else:
-                    break
-            if found:
-                return True
-
-        for index7 in range(3):
-            found = False
-            for index8 in range(3):
-                if matrix[index8][index7] == username:
-                    found = True
-                else:
-                    break
-            if found:
-                return True
-
-        found = False
-        for index9 in range(3):
-            if matrix[index9][index9] == username:
-                found = True
-            else:
-                break
-        if found:
-            return True
-
-        found = False
-        for index9 in range(3):
-            if matrix[index9][3 - index9] == username:
-                found = True
-            else:
-                break
-        if found:
-            return True
-        return found
-
 
 if __name__ == '__main__':
     HOST = 'localhost'
