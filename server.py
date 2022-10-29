@@ -198,6 +198,7 @@ class Server:
                                     winner=value3['winner'],
                                     connection=connections
                                 )
+                                self.feed[index3] = GAME_DATA
                                 await websocket.send(json.dumps({'status': True, 'message': 'Game joined'}))
                 else:
                     await websocket.send(json.loads({'status': False, 'message': 'Unauthorized'}))
