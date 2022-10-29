@@ -61,7 +61,6 @@ class Server:
                         break
                 if found:
                     return True
-                return found
 
             def get_vertical(matrix):
                 for index7 in range(3):
