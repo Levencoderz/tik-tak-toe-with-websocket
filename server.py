@@ -1,10 +1,9 @@
 import datetime
 import json
 
+import jwt
 import asyncio
 import websockets
-import python_jwt
-from jwcrypto import jwk
 
 
 class Server:
@@ -17,15 +16,16 @@ class Server:
         self.feed = []
 
     def key(self):
-        return jwk.JWK.generate(kty='RSA', size=2048)
+        return 'ASDFQWERT'
 
     def start(self):
         return websockets.serve(self.handler, self.host, self.port)
 
     def get_account(self, token):
-        HEADERS, CLAIM = jwt.verify_jwt(token, self.key(), ['PS256'])
-        if datetime.now() < CLAIM.get('exp'):
-            account, status = CLAIM, True
+        decoded = jwt.decode(token, key=self.key(), algorithm=['HS256'])
+        epoch = datetime.datetime.fromtimestamp(decoded['exp'])
+        if datetime.now() < epoch:
+            account, status = decoded, True
         return dict(), False
 
     def won(self, steps, player):
@@ -110,9 +110,12 @@ class Server:
                     for i, v in enumerate(self.accounts):  
                         if v['username'] == username and v['password'] == password:
                             userobject = v
-                            token = python_jwt.generate_jwt(v, self.key(), 'PS256', datetime.timedelta(days=10))
+                            expiry = datetime.datetime() + datetime.timdelta(days=10)
+                            expiry = expiry.timestamp()
+                            v['exp'] = expiry
+                            token = jwt.encode(payload=v, key=self.key())
                             await websocket.send(json.dumps({'status': True, 'message': 'Login successful', 'data':  token}))
-                    if userobject is None:
+                    if not userobject:
                         await websocket.send(json.dumps({'status': False, 'message': 'Password is invalid'}))
 
         elif 'register' in path:
@@ -193,7 +196,7 @@ class Server:
                 message = json.loads(message)
                 account, status = self.get_account(message['token'])
 
-                if status
+                if status:
                     gameID = message['data']['id']
                     game_instance = dict()
 
@@ -233,9 +236,10 @@ class Server:
                         if value2['id'] == game:
                             game_instance = value2
 
-                    if game_instance.get('id') and 
-                        (account['username'] == game_instance['player_one'] or
-                         account['username'] == game_instance['player_two']):
+                    if (
+                        game_instance.get(id)
+                        and (account['username'] == game_instance['player_one'] or account['username'] == game_instance['player_two'])
+                        ):
 
                         coordinate = message['data']['coordinate']
                         game_stat, status = self.game_status(account, game_instance, coordinate)
