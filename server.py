@@ -16,7 +16,7 @@ class Server:
         self.feed = []
 
     def key(self):
-        return 'dhwiuhfsjnvkjnsnvjknjknv'
+        return 'repostreet'
 
     def start(self):
         return websockets.serve(self.handler, self.host, self.port)
@@ -30,6 +30,7 @@ class Server:
 
     def won(self, steps, player):
         matrix = [[-1 for j in range(3)] for i in range(3)]
+        won = False
         username = player
 
         for step in steps:
@@ -63,6 +64,8 @@ class Server:
                         else:
                             found = False
                             break
+                    if found:
+                        return found
                 return found
 
             def get_horizontal(matrix):
@@ -74,18 +77,19 @@ class Server:
                         else:
                             found = False
                             break
+                    if found:
+                        return found
                 return found
 
-            won = False
-            if get_horizontal(matrix):
-                won = True
-            elif get_vertical(matrix):
-                won = True
-            elif get_left_digonal(matrix):
-                won = True
-            elif get_right_digonal(matrix):
-                won = True
-            return won
+        if get_horizontal(matrix):
+            won = True
+        elif get_vertical(matrix):
+            won = True
+        elif get_left_digonal(matrix):
+            won = True
+        elif get_right_digonal(matrix):
+            won = True
+        return won
 
     async def handler(self, websocket, path):
         if 'login' in path:
@@ -182,7 +186,7 @@ class Server:
                 else:
                     await websocket.send(json.dumps({'status': False, 'message': 'Unauthorized.'}))
 
-        elif 'join-game' in path:
+        elif 'spectate-game' in path:
             async for message in websocket:
                 message = json.loads(message)
                 account, status = self.get_account(message['token'])
@@ -228,7 +232,7 @@ class Server:
                             game_instance = value2
 
                     if (
-                        game_instance.get(id)
+                        game_instance.get('id')
                         and (account['username'] == game_instance['player_one'] or account['username'] == game_instance['player_two'])
                         ):
 
