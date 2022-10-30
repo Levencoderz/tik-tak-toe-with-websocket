@@ -16,7 +16,7 @@ class Server:
         self.feed = []
 
     def key(self):
-        return 'ASDFQWERT'
+        return 'dhwiuhfsjnvkjnsnvjknjknv'
 
     def start(self):
         return websockets.serve(self.handler, self.host, self.port)
@@ -25,7 +25,7 @@ class Server:
         decoded = jwt.decode(token, key=self.key(), algorithm=['HS256'])
         epoch = datetime.datetime.fromtimestamp(decoded['exp'])
         if datetime.now() < epoch:
-            account, status = decoded, True
+            return decoded, True
         return dict(), False
 
     def won(self, steps, player):
@@ -110,7 +110,7 @@ class Server:
                     for i, v in enumerate(self.accounts):  
                         if v['username'] == username and v['password'] == password:
                             userobject = v
-                            expiry = datetime.datetime() + datetime.timdelta(days=10)
+                            expiry = datetime.datetime.now() + datetime.timdelta(days=10)
                             expiry = expiry.timestamp()
                             v['exp'] = expiry
                             token = jwt.encode(payload=v, key=self.key())
