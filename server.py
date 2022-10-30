@@ -39,28 +39,20 @@ class Server:
             matrix[coord1][coord2] = step['username']
 
             def get_left_digonal(matrix):
-                found = False
+                found = True
                 for index9 in range(3):
                     index10 = index9
-                    if matrix[index9][index10] == username:
-                        found = True
-                    else:
+                    if matrix[index9][index10] != username:
                         found = False
-                        break
-                if found:
-                    return True
+                return found
 
             def get_right_digonal(matrix):
                 found = False
                 for index9 in range(3):
                     index10 = 3 - index9
-                    if matrix[index9][index10] == username:
+                    if matrix[index9][index10] != username:
                         found = True
-                    else:
-                        found = False
-                        break
-                if found:
-                    return True
+                return found
 
             def get_vertical(matrix):
                 for index7 in range(3):
@@ -71,8 +63,7 @@ class Server:
                         else:
                             found = False
                             break
-                    if found:
-                        return True
+                return found
 
             def get_horizontal(matrix):
                 for index5 in range(3):
@@ -83,8 +74,8 @@ class Server:
                         else:
                             found = False
                             break
-                    if found:
-                        return True
+                return found
+
             won = False
             if get_horizontal(matrix):
                 won = True
