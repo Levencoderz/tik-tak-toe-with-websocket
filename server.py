@@ -22,74 +22,76 @@ class Server:
         return websockets.serve(self.handler, self.host, self.port)
 
     def get_account(self, token):
-        decoded = jwt.decode(token, key=self.key(), algorithm=['HS256'])
+        decoded = jwt.decode(token, key=self.key(), algorithms=['HS256'])
         epoch = datetime.datetime.fromtimestamp(decoded['exp'])
-        if datetime.now() < epoch:
+        if datetime.datetime.now() < epoch:
             return decoded, True
         return dict(), False
 
-    def won(self, steps, player):
-        matrix = [[-1 for j in range(3)] for i in range(3)]
-        won = False
-        username = player
-
-        for step in steps:
-            splitted = map(int, step['coordinate'].split(','))
-            coord1 = splitted[0].strip()
-            coord2 = splitted[1].strip()
-            matrix[coord1][coord2] = step['username']
-
-            def get_left_digonal(matrix):
-                found = True
-                for index9 in range(3):
-                    index10 = index9
-                    if matrix[index9][index10] != username:
-                        found = False
-                return found
-
-            def get_right_digonal(matrix):
+    def get_left_digonal(self, matrix, username):
+        found = True
+        for index9 in range(3):
+            index10 = index9
+            if matrix[index9][index10] != username:
                 found = False
-                for index9 in range(3):
-                    index10 = 3 - index9
-                    if matrix[index9][index10] != username:
-                        found = True
-                return found
+        return found
 
-            def get_vertical(matrix):
-                for index7 in range(3):
+    def get_right_digonal(self, matrix, username):
+        found = False
+        for index9 in range(3):
+            index10 = 2 - index9
+            if matrix[index9][index10] != username:
+                found = False
+        return found
+
+    def get_vertical(self, matrix, username):
+        for index7 in range(3):
+            found = False
+            for index8 in range(3):
+                if matrix[index8][index7] == username:
+                    found = True
+                else:
                     found = False
-                    for index8 in range(3):
-                        if matrix[index8][index7] == username:
-                            found = True
-                        else:
-                            found = False
-                            break
-                    if found:
-                        return found
+                    break
+            if found:
                 return found
+        return found
 
-            def get_horizontal(matrix):
-                for index5 in range(3):
+    def get_horizontal(self, matrix, username):
+        for index5 in range(3):
+            found = False
+            for index6 in range(3):
+                if matrix[index5][index6] == username:
+                    found = True
+                else:
                     found = False
-                    for index6 in range(3):
-                        if matrix[index5][index6] == username:
-                            found = True
-                        else:
-                            found = False
-                            break
-                    if found:
-                        return found
+                    break
+            if found:
                 return found
+        return found
 
-        if get_horizontal(matrix):
+    def won(self, player, steps):
+        matrix = self.get_matrix(steps)
+        won = False
+        if self.get_horizontal(matrix, player):
             won = True
-        elif get_vertical(matrix):
+        elif self.get_vertical(matrix, player):
             won = True
-        elif get_left_digonal(matrix):
+        elif self.get_left_digonal(matrix, player):
             won = True
-        elif get_right_digonal(matrix):
+        elif self.get_right_digonal(matrix, player):
             won = True
         return won
+
+    def get_matrix(self, steps):
+        matrix = [[-1 for j in range(3)] for i in range(3)]
+        won = False
+        for step in steps:
+            coord1 = step['coordinate'][0]
+            coord2 = step['coordinate'][1]
+            matrix[coord1][coord2] = step['username']
+        return matrix
+
 
     async def handler(self, websocket, path):
         if 'login' in path:
@@ -105,7 +107,7 @@ class Server:
                     for i, v in enumerate(self.accounts):  
                         if v['username'] == username and v['password'] == password:
                             userobject = v
-                            expiry = datetime.datetime.now() + datetime.timdelta(days=10)
+                            expiry = datetime.datetime.now() + datetime.timedelta(days=10)
                             expiry = expiry.timestamp()
                             v['exp'] = expiry
                             token = jwt.encode(payload=v, key=self.key())
@@ -132,7 +134,7 @@ class Server:
                 message = json.loads(message)
                 account, status = self.get_account(message['token'])
                 if status == True:
-                    feed = [i for i in self.feed()]
+                    feed = [i for i in self.feed]
                     feed.reverse()
                     feed = feed[:20]
                     self.CONNECTED.append(websocket)
@@ -148,20 +150,23 @@ class Server:
                 import uuid
                 if status:
                     game = dict(
-                        id=uuid.uuid4(),
-                        player_one=account,
+                        id=str(uuid.uuid4()),
+                        player_one=account['username'],
                         player_two=str(),
                         steps=list(),
                         winner=str(),
                         connection=list()
                     )
                     self.feed.append(game)
-                    await asyncio.wait([websocket.send(json.dumps(game)) for i in self.CONNECTED])
+                    if self.CONNECTED:
+                        await asyncio.wait([websocket.send(json.dumps(game)) for i in self.CONNECTED])
+                    await websocket.send(json.dumps({'status': False, 'message': 'Game created'}))
                 else:
                     await asyncio.send(json.dumps({'status': False, 'message': 'Invalid credentials'}))
 
         elif 'join-game' in path:
             async for message in websocket:
+                message = json.loads(message)
                 account, status = self.get_account(message['token'])
 
                 if status:
@@ -169,10 +174,11 @@ class Server:
                     valid = False
                     for index1, value1 in enumerate(self.feed):
                         if value1['id'] == game:
+                            ERROR_MESSAGE = 'You have alreaady joined'
                             if value1['player_one'] == account['username']:
-                                await websocket.send(json.dumps({'status': False, 'message': 'You are already in a match'}))
+                                await websocket.send(json.dumps({'status': False, 'message': ERROR_MESSAGE}))
                             elif value1['player_two'] == account['username']:
-                                await websocket.send(json.dumps({'status': False, 'message': 'You are the host.'}))
+                                await websocket.send(json.dumps({'status': False, 'message': ERROR_MESSAGE}))
                             else:
                                 self.feed[index1] = dict(
                                     id=value1['id'],
@@ -197,7 +203,7 @@ class Server:
 
                     for index3, value3 in enumerate(self.feed):
                         if value3['id'] == gameID:
-                            if value3['player_one'] == account or value3['player_two'] == account:
+                            if value3['player_one'] == account['username'] or value3['player_two'] == account['username']:
                                 connections = value3['connection']
                                 connections.append(
                                     {
@@ -227,7 +233,7 @@ class Server:
                     game = message['data']['id']
                     game_instance = dict()
 
-                    for index2, value2 in eumerate(self.feed):
+                    for index2, value2 in enumerate(self.feed):
                         if value2['id'] == game:
                             game_instance = value2
 
@@ -235,21 +241,21 @@ class Server:
                         game_instance.get('id')
                         and (account['username'] == game_instance['player_one'] or account['username'] == game_instance['player_two'])
                         ):
-
-                        coordinate = message['data']['coordinate']
+                        coordinate = message['coordinate']
                         game_stat, status = self.game_status(account, game_instance, coordinate)
                         game_sockets = [i['socket'] for i in value2['connection']]
 
-                        if status is 'MATCH_OVER':
-                            await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'DRAW', 'game': game_stat})) for i in game_sockets])
-                        elif status is 'WON':
-                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'WON', 'game': game_stat})) for i in game_sockets])
-                        elif status is 'STEPPED':
-                            await asyncio.wait([websocket.send(json.dumps({'status': True, 'message': 'STEPPED','game': game_stat})) for i in game_sockets])
-                        elif status is 'WAIT':
-                            await asyncio.wait([websocket.send(json.dumps({'status': False, 'message': 'Waiting for next player', 'game': game_stat})) for i in game_sockets])
+                        import pdb; pdb.set_trace()
+                        if status == 'MATCH_OVER':
+                            await asyncio.wait([i.send(json.dumps({'status': False, 'message': 'DRAW', 'game': self.get_matrix(game_stat)})) for i in game_sockets])
+                        elif status == 'WON':
+                            await asyncio.wait([i.send(json.dumps({'status': True, 'message': 'WON', 'game': self.get_matrix(game_stat)})) for i in game_sockets])
+                        elif status == 'STEPPED':
+                            await asyncio.wait([i.send(json.dumps({'status': True, 'message': 'STEPPED','game': self.get_matrix(game_stat)})) for i in game_sockets])
+                        elif status == 'WAIT':
+                            await asyncio.wait([i.send(json.dumps({'status': False, 'message': 'Waiting for next player', 'game': self.get_matrix(game_stat)})) for i in game_sockets])
                     else:
-                        await websocket.send({'status': False, 'message': 'Game not found'})
+                        await websocket.send(json.dumps({'status': False, 'message': 'Game not found'}))
                 else:
                     await websocket.send(json.dumps({'status': False, 'message': 'Unauthorized'}))
 
@@ -258,15 +264,15 @@ class Server:
         status = None
         for index4, value4 in enumerate(self.feed):
             if value4['id'] == gameID:
-                player_1 = self.won(value4['player_one'], value4['steps'], account)
-                player_2 = self.won(value4['player_two'], value4['steps'], account)
+                player_1 = self.won(value4['player_one'], value4['steps'])
+                player_2 = self.won(value4['player_two'], value4['steps'])
                 if len(value4['steps']) >= 9 and not (player_1 or player_two):
                     return value4['steps'], 'GAME_OVER'
                 elif player_1 or player_2:
                     return value4['steps'], 'WON'
                 elif len(value4['steps']) < 1:
                     step = list(map(int, coordinate.split(',')))
-                    value4['step'].append(
+                    value4['steps'].append(
                         {
                             'username': account['username'], 
                             'coordinate': step
@@ -277,7 +283,7 @@ class Server:
                         player_one=value4['player_one'],
                         player_two=value4['player_two'],
                         connection=value4['connection'],
-                        steps=value4['step'],
+                        steps=value4['steps'],
                         winner=str()
                     )
                     return value4['steps'], 'STEPPED'
