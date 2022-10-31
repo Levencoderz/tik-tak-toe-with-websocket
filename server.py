@@ -37,7 +37,7 @@ class Server:
         return found
 
     def get_right_digonal(self, matrix, username):
-        found = False
+        found = True
         for index9 in range(3):
             index10 = 2 - index9
             if matrix[index9][index10] != username:
