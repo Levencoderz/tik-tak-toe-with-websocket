@@ -277,6 +277,15 @@ class Server:
                             'coordinate': step
                         }
                     )
+                    game = dict(
+                        id= value4['id'],
+                        player_one=value4['player_one'],
+                        player_two=value4['player_two'],
+                        connection=value4['connection'],
+                        steps=value4['steps'],
+                        winner=str()
+                    )
+                    self.feed[index4] = game
                     return value4['steps'], 'STEPPED'
                 elif len(value4['steps']) > 1:
                     last_step = value4['steps'][-1]
@@ -289,6 +298,15 @@ class Server:
                             'coordinate': step
                         }
                     )
+                    game = dict(
+                        id= value4['id'],
+                        player_one=value4['player_one'],
+                        player_two=value4['player_two'],
+                        connection=value4['connection'],
+                        steps=value4['step'],
+                        winner=str()
+                    )
+                    self.feed[index4] = game
                     player_1 = self.won(value4['player_one'], value4['steps'])
                     player_2 = self.won(value4['player_two'], value4['steps'])
 
