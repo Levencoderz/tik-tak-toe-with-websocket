@@ -245,7 +245,6 @@ class Server:
                         game_stat, status = self.game_status(account, game_instance, coordinate)
                         game_sockets = [i['socket'] for i in value2['connection']]
 
-                        import pdb; pdb.set_trace()
                         if status == 'MATCH_OVER':
                             await asyncio.wait([i.send(json.dumps({'status': False, 'message': 'DRAW', 'game': self.get_matrix(game_stat)})) for i in game_sockets])
                         elif status == 'WON':
