@@ -267,8 +267,6 @@ class Server:
                 player_2 = self.won(value4['player_two'], value4['steps'])
                 if len(value4['steps']) >= 9 and not (player_1 or player_two):
                     return value4['steps'], 'GAME_OVER'
-                elif player_1 or player_2:
-                    return value4['steps'], 'WON'
                 elif len(value4['steps']) < 1:
                     step = list(map(int, coordinate.split(',')))
                     value4['steps'].append(
