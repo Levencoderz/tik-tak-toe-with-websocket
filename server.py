@@ -160,7 +160,7 @@ class Server:
                     self.feed.append(game)
                     if self.CONNECTED:
                         await asyncio.wait([websocket.send(json.dumps(game)) for i in self.CONNECTED])
-                    await websocket.send(json.dumps({'status': False, 'message': 'Game created'}))
+                    await websocket.send(json.dumps({'status': False, 'message': 'Game created', 'data': game}))
                 else:
                     await asyncio.send(json.dumps({'status': False, 'message': 'Invalid credentials'}))
 
