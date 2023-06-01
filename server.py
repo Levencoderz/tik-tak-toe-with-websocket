@@ -175,6 +175,8 @@ class Server:
                     for index1, value1 in enumerate(self.feed):
                         if value1['id'] == game:
                             ERROR_MESSAGE = 'You have alreaady joined'
+                            if value1['player_two'] and value1['player_two']:
+                                await websocket.send(json.dumps({'status': False, 'message': 'Please create a new game'}) 
                             if value1['player_one'] == account['username']:
                                 await websocket.send(json.dumps({'status': False, 'message': ERROR_MESSAGE}))
                             elif value1['player_two'] == account['username']:
