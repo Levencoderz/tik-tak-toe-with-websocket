@@ -13,6 +13,8 @@ class Server:
         self.host = host
         self.port = port
         self.accounts = []
+        # Game IDs could be stored in hashmap with details
+        # This will help in getting game information quickly. 
         self.feed = []
 
     def key(self):
