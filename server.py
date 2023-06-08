@@ -269,7 +269,9 @@ class Server:
             if value4['id'] == gameID:
                 player_1 = self.won(value4['player_one'], value4['steps'])
                 player_2 = self.won(value4['player_two'], value4['steps'])
-                if len(value4['steps']) >= 9 and not (player_1 or player_two):
+                if value4.get('winner'):
+                    return value4['steps'], 'WON'
+                elif len(value4['steps']) >= 9:
                     return value4['steps'], 'GAME_OVER'
                 elif len(value4['steps']) < 1:
                     step = list(map(int, coordinate.split(',')))
@@ -309,16 +311,11 @@ class Server:
                         winner=str()
                     )
                     self.feed[index4] = game
-                    won = self.won(account['username'], value4['steps'])
-
-                    if won:
+                    if self.won(account['username'], value4['steps'])
                         self.feed[index4]['winner'] = account['username']
                         return value4['steps'], 'WON'
                     else:
                         return value4['steps'], 'STEPPED'
-
-                else:
-                    return value4['steps'], 'WON'
                     
                     
 
