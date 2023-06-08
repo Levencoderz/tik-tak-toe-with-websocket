@@ -267,8 +267,6 @@ class Server:
         status = None
         for index4, value4 in enumerate(self.feed):
             if value4['id'] == gameID:
-                player_1 = self.won(value4['player_one'], value4['steps'])
-                player_2 = self.won(value4['player_two'], value4['steps'])
                 if value4.get('winner'):
                     return value4['steps'], 'WON'
                 elif len(value4['steps']) >= 9:
