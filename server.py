@@ -309,7 +309,7 @@ class Server:
                         winner=str()
                     )
                     self.feed[index4] = game
-                    if self.won(account['username'], value4['steps'])
+                    if self.won(account['username'], value4['steps']):
                         self.feed[index4]['winner'] = account['username']
                         return value4['steps'], 'WON'
                     else:
