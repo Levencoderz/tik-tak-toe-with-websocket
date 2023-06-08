@@ -289,7 +289,7 @@ class Server:
                     )
                     self.feed[index4] = game
                     return value4['steps'], 'STEPPED'
-                elif len(value4['steps']) > 1 and not (player_1 or player_2):
+                else:
                     last_step = value4['steps'][-1]
                     if last_step['username'] == account['username']:
                         return value4, 'WAIT'
