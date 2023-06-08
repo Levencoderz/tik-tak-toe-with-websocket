@@ -289,7 +289,7 @@ class Server:
                     )
                     self.feed[index4] = game
                     return value4['steps'], 'STEPPED'
-                elif len(value4['steps']) > 1:
+                elif len(value4['steps']) > 1 and not (player_1 or player_2):
                     last_step = value4['steps'][-1]
                     if last_step['username'] == account['username']:
                         return value4, 'WAIT'
@@ -309,15 +309,18 @@ class Server:
                         winner=str()
                     )
                     self.feed[index4] = game
-                    player_1 = self.won(value4['player_one'], value4['steps'])
-                    player_2 = self.won(value4['player_two'], value4['steps'])
+                    won = self.won(account['username'], value4['steps'])
 
-                    if player_1:
-                        return value4['steps'], 'Player 1 WON'
-                    elif player_2:
-                        return value4['steps'], 'Player 2 WON'
+                    if won:
+                        self.feed[index4]['winner'] = account['username']
+                        return value4['steps'], 'WON'
                     else:
-                        return value4['steps'], 'STEPPED' 
+                        return value4['steps'], 'STEPPED'
+
+                elif value4['winner']:
+                    return value4['steps'], 'WON'
+                    
+                    
 
 if __name__ == '__main__':
     HOST = 'localhost'
@@ -325,5 +328,5 @@ if __name__ == '__main__':
 
     server = Server(host=HOST, port=PORT)
     server_instance = server.start()
-    asyncio.get_event_loop().run_until_complete(server_instance)
+    asyncio.get_event_loop().runtil_complete(server_instance)
     asyncio.get_event_loop().run_forever()
