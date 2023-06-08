@@ -317,7 +317,7 @@ class Server:
                     else:
                         return value4['steps'], 'STEPPED'
 
-                elif value4['winner']:
+                else:
                     return value4['steps'], 'WON'
                     
                     
