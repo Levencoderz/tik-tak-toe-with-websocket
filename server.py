@@ -313,9 +313,9 @@ class Server:
                     player_2 = self.won(value4['player_two'], value4['steps'])
 
                     if player_1:
-                        return value4['steps'], 'WON'
+                        return value4['steps'], 'Player 1 WON'
                     elif player_2:
-                        return value4['steps'], 'WON'
+                        return value4['steps'], 'Player 2 WON'
                     else:
                         return value4['steps'], 'STEPPED' 
 
